@@ -1,5 +1,5 @@
 from tkinter import *
-import math
+import math 
 
 
 PINK = "#e2979c"
@@ -15,6 +15,7 @@ timer = None
 
 
 def reset_timer():
+    """Cancels the timer and resets the labels and reps"""
     window.after_cancel(timer)
     canvas.itemconfig(timer_text, text="00:00")
     title_label.config(text="Timer", fg=GREEN)
@@ -24,39 +25,53 @@ def reset_timer():
 
 
 def start_timer():
+    """Starts the timer and changes the labels accordingly"""
     global reps
     reps += 1
     
+    # convert the work and break minutes to seconds
     work_seconds = WORK_MIN * 60
     short_break_seconds = SHORT_BREAK_MIN * 60
     long_break_seconds = LONG_BREAK_MIN * 60
     
+    # if its the 8th rep i.e. after completing 4 work sessions, start a long break session
     if reps % 8 == 0:
         count_down(long_break_seconds)
         title_label.config(text="Break", fg=RED)
+    # after every rep start the short break session
     elif reps % 2 == 0:
         count_down(short_break_seconds)
         title_label.config(text="Break", fg=PINK)
+    # start the work session
     else:
         count_down(work_seconds)
         title_label.config(text="Work", fg=GREEN)
         
         
 def count_down(count):
-    count_min = math.floor(count / 60)
-    count_sec = count % 60
-    if count_sec < 10:
-        count_sec = f"0{count_sec}"
-    if count_min < 10:
-        count_min = f"0{count_min}"
+    """Starts the timer with the start_timer() function or the window.after() and 
+        increase controls the check marks indicating when a rep is completed"""
+        
+    # converts the seconds to minutes
+    count_minutes = math.floor(count / 60)
+    # converts the seconds to the remaining seconds from the current minute
+    count_seconds = count % 60
     
-    canvas.itemconfig(timer_text, text=f"{count_min}:{count_sec}")
+    # if the seconds/minutes are in single digits, then format them to display time correctly like: 05:02
+    if count_seconds < 10:
+        count_seconds = f"0{count_seconds}"
+    if count_minutes < 10:
+        count_minutes = f"0{count_minutes}"
+    
+    canvas.itemconfig(timer_text, text=f"{count_minutes}:{count_seconds}")
     if count > 0:
         global timer
         timer = window.after((75//2)//2, count_down, count - 1)
     else:
+        # start the timer
         start_timer()
         marks = ""
+        # update the checkmarks
         for _ in range(math.floor(reps / 2)):
             marks += "✔"
         check_marks.config(text=marks)
